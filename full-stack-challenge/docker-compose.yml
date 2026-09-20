@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dynamoxtest-db
+    environment:
+      POSTGRES_USER: dynamox
+      POSTGRES_PASSWORD: dynamox
+      POSTGRES_DB: dynamoxtest
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dynamox -d dynamoxtest"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
