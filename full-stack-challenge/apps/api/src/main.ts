@@ -1,19 +1,31 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
-import { Logger } from '@nestjs/common';
+import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
+import type { NestExpressApplication } from "@nestjs/platform-express";
+import { requestTimingMiddleware } from "./common/middleware/request-timing.middleware";
+import { PrismaExceptionFilter } from "./common/filters/prisma-exception.filter";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3000;
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.setGlobalPrefix("api");
+  app.enableCors({ origin: process.env.CORS_ORIGIN?.split(",") ?? true });
+  app.useBodyParser("json", { limit: "5mb" });
+  app.use(requestTimingMiddleware);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, 
+      forbidNonWhitelisted: true, 
+      transform: true, 
+    }),
+  );
+
+  app.useGlobalFilters(new PrismaExceptionFilter());
+  app.enableShutdownHooks();
+
+  const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
-  Logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
 }
 
 bootstrap();
