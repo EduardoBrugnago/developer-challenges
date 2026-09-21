@@ -6,9 +6,10 @@ import { APP_GUARD } from "@nestjs/core";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { AuthModule } from "../auth/auth.module";
 import { MachinesModule } from "../machines/machines.module";
+import { MonitoringPointsModule } from "../monitoring-points/monitoring-points.module";
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, MachinesModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, MachinesModule, MonitoringPointsModule],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
