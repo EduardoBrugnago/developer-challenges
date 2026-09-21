@@ -5,9 +5,10 @@ import { HealthController } from "./health.controller";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { AuthModule } from "../auth/auth.module";
+import { MachinesModule } from "../machines/machines.module";
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, MachinesModule],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
