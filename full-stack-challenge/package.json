@@ -16,7 +16,8 @@
     "db:up": "docker compose up -d db",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed:demo": "tsx --env-file=.env apps/api/prisma/seed-demo.ts"
   },
   "keywords": [],
   "author": "",
