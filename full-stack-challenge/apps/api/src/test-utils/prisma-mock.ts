@@ -1,7 +1,10 @@
 import { mockDeep } from "jest-mock-extended";
 import { PrismaService } from "../prisma/prisma.service";
 
-type MockedDelegate<T> = { [K in keyof T]: jest.Mock };
+
+type MockedDelegate<T> = T extends (...args: never[]) => unknown
+  ? jest.Mock
+  : { [K in keyof T]: jest.Mock };
 
 export type PrismaMock = {
   [K in keyof PrismaService]: MockedDelegate<PrismaService[K]>;
@@ -10,7 +13,6 @@ export type PrismaMock = {
 export const createPrismaMock = (): PrismaMock =>
   mockDeep<PrismaService>() as unknown as PrismaMock;
 
-/** Provider pronto para usar em Test.createTestingModule. */
 export const prismaMockProvider = (mock: PrismaMock) => ({
   provide: PrismaService,
   useValue: mock,
