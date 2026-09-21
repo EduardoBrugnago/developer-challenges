@@ -65,3 +65,39 @@ export interface PaginatedResponse<T> {
   data: T[];
   meta: PaginationMeta;
 }
+
+/* ---------- Time Series ---------- */
+export interface DataPointInput {
+  timestamp: string;
+  value: number;
+}
+export interface CreateTimeSeriesRequest {
+  name: string;
+  unit?: string;
+  points: DataPointInput[];
+}
+export interface TimeSeriesSummary {
+  id: string;
+  name: string;
+  unit: string | null;
+  createdAt: string;
+  pointsCount: number;
+  sensor: SensorOption;
+}
+export interface TimeSeriesDetail {
+  id: string;
+  name: string;
+  unit: string | null;
+  createdAt: string;
+  points: DataPointInput[];
+}
+export interface TimeSeriesMetrics {
+  count: number;
+  min: number | null;
+  max: number | null;
+  mean: number | null;
+  median: number | null;
+  stdDev: number | null;
+  startAt: string | null;
+  endAt: string | null;
+}
