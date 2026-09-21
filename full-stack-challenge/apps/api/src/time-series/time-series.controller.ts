@@ -14,7 +14,12 @@ import {
 import { TimeSeriesService } from "./time-series.service";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { JwtPayload } from "../common/types/auth.types";
-import { CreateTimeSeriesDto, ListTimeSeriesQueryDto, PointsDto, TimeRangeQueryDto } from "./dto/time-series.dto";
+import {
+  CreateTimeSeriesDto,
+  ListTimeSeriesQueryDto,
+  PointsDto,
+  TimeRangeQueryDto,
+} from "./dto/time-series.dto";
 
 @Controller()
 export class TimeSeriesController {
@@ -70,5 +75,13 @@ export class TimeSeriesController {
     @Param("id", ParseUUIDPipe) id: string,
   ) {
     return this.service.remove(user.sub, id);
+  }
+
+  @Get("time-series/:id/metrics")
+  metrics(
+    @CurrentUser() user: JwtPayload,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.service.metrics(user.sub, id);
   }
 }

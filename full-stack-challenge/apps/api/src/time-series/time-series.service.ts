@@ -178,4 +178,28 @@ export class TimeSeriesService {
     if (!series) throw new NotFoundException(`Time series ${id} not found`);
     return series;
   }
+
+  async metrics(userId: string, id: string): Promise<TimeSeriesMetrics> {
+    await this.findOwnedOrThrow(userId, id);
+
+    const [row] = await this.prisma.$queryRaw<MetricsRow[]>`
+      SELECT
+        COUNT(*)::int                                        AS "count",
+        MIN("value")                                         AS "min",
+        MAX("value")                                         AS "max",
+        AVG("value")                                         AS "mean",
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "value") AS "median",
+        STDDEV_SAMP("value")                                 AS "stdDev",
+        MIN("timestamp")                                     AS "startAt",
+        MAX("timestamp")                                     AS "endAt"
+      FROM "DataPoint"
+      WHERE "seriesId" = ${id}
+    `;
+
+    return {
+      ...row,
+      startAt: row.startAt?.toISOString() ?? null,
+      endAt: row.endAt?.toISOString() ?? null,
+    };
+  }
 }
