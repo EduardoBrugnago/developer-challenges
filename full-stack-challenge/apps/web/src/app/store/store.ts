@@ -4,12 +4,14 @@ import authReducer, {
   logout,
 } from "../../modules/auth/store/authSlice";
 import machinesReducer from "../../modules/machines/store/machinesSlice";
+import monitoringPointsReducer from "../../modules/monitoringPoints/store/monitoringPointsSlice";
 import { registerUnauthorizedHandler } from "../../services/api/httpClient";
 import notificationsReducer from "./notificationsSlice";
 
 const appReducer = combineReducers({
   auth: authReducer,
   machines: machinesReducer,
+  monitoringPoints: monitoringPointsReducer,
   notifications: notificationsReducer,
 });
 

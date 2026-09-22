@@ -1,6 +1,7 @@
 import type {
   CreateMachineRequest,
   Machine,
+  MachineOption,
   MachineSortField,
   PaginatedResponse,
   SortOrder,
@@ -20,6 +21,8 @@ export const machinesApi = {
     http
       .get<PaginatedResponse<Machine>>("/machines", { params })
       .then((r) => r.data),
+  options: () =>
+    http.get<MachineOption[]>("/machines/options").then((r) => r.data),
   create: (body: CreateMachineRequest) =>
     http.post<Machine>("/machines", body).then((r) => r.data),
   update: (id: string, body: UpdateMachineRequest) =>

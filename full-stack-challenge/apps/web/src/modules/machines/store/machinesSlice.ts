@@ -3,6 +3,7 @@ import {
   MACHINES_PAGE_SIZE,
   type CreateMachineRequest,
   type Machine,
+  type MachineOption,
   type MachineSortField,
   type PaginationMeta,
   type SortOrder,
@@ -17,6 +18,7 @@ import { createAppAsyncThunk } from "../../../app/store/hooks";
 
 interface MachinesState {
   items: Machine[];
+  options: MachineOption[];
   meta: PaginationMeta;
   query: MachinesQuery;
   status: "idle" | "loading" | "succeeded" | "failed";
@@ -24,6 +26,7 @@ interface MachinesState {
 
 const initialState: MachinesState = {
   items: [],
+  options: [],
   meta: { page: 1, limit: MACHINES_PAGE_SIZE, total: 0, totalPages: 1 },
   query: {
     page: 1,
@@ -39,6 +42,17 @@ export const fetchMachines = createAppAsyncThunk(
   async (_: void, { getState, rejectWithValue }) => {
     try {
       return await machinesApi.list(getState().machines.query);
+    } catch (error) {
+      return rejectWithValue(getErrorMessage(error));
+    }
+  },
+);
+
+export const fetchMachineOptions = createAppAsyncThunk(
+  "machines/fetchOptions",
+  async (_: void, { rejectWithValue }) => {
+    try {
+      return await machinesApi.options();
     } catch (error) {
       return rejectWithValue(getErrorMessage(error));
     }
@@ -118,6 +132,9 @@ const machinesSlice = createSlice({
       })
       .addCase(fetchMachines.rejected, (state) => {
         state.status = "failed";
+      })
+      .addCase(fetchMachineOptions.fulfilled, (state, action) => {
+        state.options = action.payload;
       })
       .addCase(updateMachine.fulfilled, (state, action) => {
         const index = state.items.findIndex((m) => m.id === action.payload.id);
