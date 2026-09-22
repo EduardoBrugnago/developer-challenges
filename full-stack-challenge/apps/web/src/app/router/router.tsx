@@ -4,6 +4,8 @@ import { LoginPage } from "../../modules/auth/pages/LoginPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { MachinesPage } from "../../modules/machines/pages/MachinesPage";
 import { MonitoringPointsPage } from "../../modules/monitoringPoints/pages/MonitoringPointsPage";
+import { TimeSeriesPage } from "../../modules/timeSeries/pages/TimeSeriesPage";
+import { TimeSeriesDetailPage } from "../../modules/timeSeries/pages/TimeSeriesDetailPage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -16,6 +18,8 @@ export const router = createBrowserRouter([
           { path: "/", element: <Navigate to="/machines" replace /> },
           { path: "/machines", element: <MachinesPage /> },
           { path: "/monitoring-points", element: <MonitoringPointsPage /> },
+          { path: "/time-series", element: <TimeSeriesPage /> },
+          { path: "/time-series/:id", element: <TimeSeriesDetailPage /> },
         ],
       },
     ],

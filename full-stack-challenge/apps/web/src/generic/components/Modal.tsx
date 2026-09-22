@@ -7,12 +7,14 @@ import {
   DialogContentText,
   DialogTitle,
   type ButtonProps,
+  type DialogProps,
 } from "@mui/material";
 
 export interface ModalOptions {
   title: string;
   icon?: ReactNode;
   content: ReactNode;
+  maxWidth?: DialogProps["maxWidth"];
   cancelLabel?: string;
   confirmLabel: string;
   confirmColor?: ButtonProps["color"];
@@ -45,7 +47,7 @@ export function Modal({
       open={open}
       onClose={loading ? undefined : onClose}
       fullWidth
-      maxWidth="xs"
+      maxWidth={options.maxWidth ?? "xs"}
     >
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         {options.icon}

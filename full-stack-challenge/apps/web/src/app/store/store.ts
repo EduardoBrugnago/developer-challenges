@@ -5,6 +5,7 @@ import authReducer, {
 } from "../../modules/auth/store/authSlice";
 import machinesReducer from "../../modules/machines/store/machinesSlice";
 import monitoringPointsReducer from "../../modules/monitoringPoints/store/monitoringPointsSlice";
+import timeSeriesReducer from "../../modules/timeSeries/store/timeSeriesSlice";
 import { registerUnauthorizedHandler } from "../../services/api/httpClient";
 import notificationsReducer from "./notificationsSlice";
 
@@ -12,6 +13,7 @@ const appReducer = combineReducers({
   auth: authReducer,
   machines: machinesReducer,
   monitoringPoints: monitoringPointsReducer,
+  timeSeries: timeSeriesReducer,
   notifications: notificationsReducer,
 });
 
