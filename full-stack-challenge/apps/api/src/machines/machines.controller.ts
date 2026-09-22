@@ -30,6 +30,11 @@ export class MachinesController {
     return this.machinesService.findAll(user.sub, query);
   }
 
+  @Get("options")
+  listOptions(@CurrentUser() user: JwtPayload) {
+    return this.machinesService.listOptions(user.sub);
+  }
+
   @Get(":id")
   findOne(
     @CurrentUser() user: JwtPayload,

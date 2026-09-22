@@ -23,6 +23,11 @@ export interface Machine {
   createdAt: string;
   updatedAt: string;
 }
+export interface MachineOption {
+  id: string;
+  name: string;
+  type: MachineType;
+}
 export interface CreateMachineRequest {
   name: string;
   type: MachineType;

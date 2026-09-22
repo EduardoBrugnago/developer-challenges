@@ -4,6 +4,7 @@ import {
   MACHINE_TYPE_LABELS,
   SENSOR_MODEL_LABELS,
   type Machine as MachineResponse,
+  type MachineOption,
   type MachineSortField,
   type PaginatedResponse,
   type SortOrder,
@@ -73,6 +74,14 @@ export class MachinesService {
         totalPages: Math.max(1, Math.ceil(total / limit)),
       },
     };
+  }
+
+  async listOptions(userId: string): Promise<MachineOption[]> {
+    return this.prisma.machine.findMany({
+      where: { userId },
+      select: { id: true, name: true, type: true },
+      orderBy: { name: "asc" },
+    });
   }
 
   async findOne(userId: string, id: string): Promise<MachineResponse> {

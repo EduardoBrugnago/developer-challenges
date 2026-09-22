@@ -91,6 +91,18 @@ describe("MachinesService", () => {
     expect(prisma.machine.delete).not.toHaveBeenCalled();
   });
 
+  it("lists the user's machines as select options, sorted by name", async () => {
+    prisma.machine.findMany.mockResolvedValue([] as never);
+
+    await service.listOptions(USER_ID);
+
+    expect(prisma.machine.findMany).toHaveBeenCalledWith({
+      where: { userId: USER_ID },
+      select: { id: true, name: true, type: true },
+      orderBy: { name: "asc" },
+    });
+  });
+
   describe("findAll", () => {
     it.each([
       ["name", "asc", { name: "asc" }],
