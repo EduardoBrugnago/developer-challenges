@@ -1,30 +1,44 @@
-import { createEntityAdapter, createSlice } from "@reduxjs/toolkit";
-import type {
-  CreateMachineRequest,
-  Machine,
-  UpdateMachineRequest,
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  MACHINES_PAGE_SIZE,
+  type CreateMachineRequest,
+  type Machine,
+  type MachineSortField,
+  type PaginationMeta,
+  type SortOrder,
+  type UpdateMachineRequest,
 } from "@dynamoxtest/shared";
-import { machinesApi } from "../../../services/machines/machinesApi";
+import {
+  machinesApi,
+  type MachinesQuery,
+} from "../../../services/machines/machinesApi";
 import { getErrorMessage } from "../../../services/api/errors";
 import { createAppAsyncThunk } from "../../../app/store/hooks";
-import type { RootState } from "../../../app/store/store";
 
-const machinesAdapter = createEntityAdapter<Machine>({
-  sortComparer: (a, b) => b.createdAt.localeCompare(a.createdAt),
-});
+interface MachinesState {
+  items: Machine[];
+  meta: PaginationMeta;
+  query: MachinesQuery;
+  status: "idle" | "loading" | "succeeded" | "failed";
+}
 
-type Status = "idle" | "loading" | "succeeded" | "failed";
-
-const initialState = machinesAdapter.getInitialState({
-  status: "idle" as Status,
-  error: null as string | null,
-});
+const initialState: MachinesState = {
+  items: [],
+  meta: { page: 1, limit: MACHINES_PAGE_SIZE, total: 0, totalPages: 1 },
+  query: {
+    page: 1,
+    limit: MACHINES_PAGE_SIZE,
+    sortBy: "createdAt",
+    order: "desc",
+  },
+  status: "idle",
+};
 
 export const fetchMachines = createAppAsyncThunk(
-  "machines/fetchAll",
-  async (_: void, { rejectWithValue }) => {
+  "machines/fetchPage",
+  async (_: void, { getState, rejectWithValue }) => {
     try {
-      return await machinesApi.list();
+      return await machinesApi.list(getState().machines.query);
     } catch (error) {
       return rejectWithValue(getErrorMessage(error));
     }
@@ -33,9 +47,11 @@ export const fetchMachines = createAppAsyncThunk(
 
 export const createMachine = createAppAsyncThunk(
   "machines/create",
-  async (body: CreateMachineRequest, { rejectWithValue }) => {
+  async (body: CreateMachineRequest, { dispatch, rejectWithValue }) => {
     try {
-      return await machinesApi.create(body);
+      const created = await machinesApi.create(body);
+      await dispatch(fetchMachines());
+      return created;
     } catch (error) {
       return rejectWithValue(getErrorMessage(error));
     }
@@ -58,9 +74,16 @@ export const updateMachine = createAppAsyncThunk(
 
 export const deleteMachine = createAppAsyncThunk(
   "machines/delete",
-  async (id: string, { rejectWithValue }) => {
+  async (id: string, { dispatch, getState, rejectWithValue }) => {
     try {
-      return await machinesApi.remove(id);
+      await machinesApi.remove(id);
+      const { items, query } = getState().machines;
+      if (items.length === 1 && query.page > 1) {
+        dispatch(setPage(query.page - 1));
+      } else {
+        await dispatch(fetchMachines());
+      }
+      return id;
     } catch (error) {
       return rejectWithValue(getErrorMessage(error));
     }
@@ -70,34 +93,38 @@ export const deleteMachine = createAppAsyncThunk(
 const machinesSlice = createSlice({
   name: "machines",
   initialState,
-  reducers: {},
+  reducers: {
+    setPage(state, action: PayloadAction<number>) {
+      state.query.page = action.payload;
+    },
+    setSort(
+      state,
+      action: PayloadAction<{ sortBy: MachineSortField; order: SortOrder }>,
+    ) {
+      state.query.sortBy = action.payload.sortBy;
+      state.query.order = action.payload.order;
+      state.query.page = 1;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchMachines.pending, (state) => {
         state.status = "loading";
-        state.error = null;
       })
       .addCase(fetchMachines.fulfilled, (state, action) => {
         state.status = "succeeded";
-        machinesAdapter.setAll(state, action.payload);
+        state.items = action.payload.data;
+        state.meta = action.payload.meta;
       })
-      .addCase(fetchMachines.rejected, (state, action) => {
+      .addCase(fetchMachines.rejected, (state) => {
         state.status = "failed";
-        state.error = action.payload ?? "Failed to load machines";
-      })
-      .addCase(createMachine.fulfilled, (state, action) => {
-        machinesAdapter.addOne(state, action.payload);
       })
       .addCase(updateMachine.fulfilled, (state, action) => {
-        machinesAdapter.upsertOne(state, action.payload);
-      })
-      .addCase(deleteMachine.fulfilled, (state, action) => {
-        machinesAdapter.removeOne(state, action.payload);
+        const index = state.items.findIndex((m) => m.id === action.payload.id);
+        if (index >= 0) state.items[index] = action.payload;
       });
   },
 });
 
-export const { selectAll: selectAllMachines, selectById: selectMachineById } =
-  machinesAdapter.getSelectors((state: RootState) => state.machines);
-
+export const { setPage, setSort } = machinesSlice.actions;
 export default machinesSlice.reducer;

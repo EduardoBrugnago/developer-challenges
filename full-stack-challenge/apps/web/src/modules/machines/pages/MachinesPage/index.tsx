@@ -1,50 +1,69 @@
 import { useEffect } from "react";
 import { isFulfilled } from "@reduxjs/toolkit";
-import {
-  Button,
-  Chip,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Button, Chip, IconButton, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { MACHINE_TYPE_LABELS, type Machine } from "@dynamoxtest/shared";
+import {
+  MACHINE_TYPE_LABELS,
+  type Machine,
+  type MachineSortField,
+} from "@dynamoxtest/shared";
 import { useAppDispatch, useAppSelector } from "../../../../app/store/hooks";
 import { Modal } from "../../../../generic/components/Modal";
 import { PageHeader } from "../../../../generic/components/PageHeader";
+import {
+  SortableTable,
+  type Column,
+} from "../../../../generic/components/SortableTable";
 import { useModal } from "../../../../generic/hooks/useModal";
 import { notify } from "../../../../app/store/notificationsSlice";
 import {
   createMachine,
   deleteMachine,
   fetchMachines,
-  selectAllMachines,
+  setPage,
+  setSort,
   updateMachine,
 } from "../../store/machinesSlice";
 import { MACHINE_FORM_ID, MachineForm } from "../../components/MachineForm";
 import type { MachineFormValues } from "../../model/machineSchema";
 
-const hideOnMobile = { display: { xs: "none", sm: "table-cell" } };
+const columns: Column<Machine, MachineSortField>[] = [
+  { id: "name", label: "Name", sortKey: "name", render: (m) => m.name },
+  {
+    id: "type",
+    label: "Type",
+    sortKey: "type",
+    render: (m) => <Chip size="small" label={MACHINE_TYPE_LABELS[m.type]} />,
+  },
+  {
+    id: "monitoringPoints",
+    label: "Monitoring points",
+    render: (m) => m.monitoringPointsCount,
+  },
+  {
+    id: "createdAt",
+    label: "Created at",
+    sortKey: "createdAt",
+    render: (m) =>
+      new Date(m.createdAt).toLocaleString(undefined, {
+        dateStyle: "short",
+        timeStyle: "short",
+      }),
+  },
+];
 
 export function MachinesPage() {
   const dispatch = useAppDispatch();
-  const machines = useAppSelector(selectAllMachines);
-  const status = useAppSelector((state) => state.machines.status);
+  const { items, meta, query, status } = useAppSelector(
+    (state) => state.machines,
+  );
   const modal = useModal();
 
   useEffect(() => {
     dispatch(fetchMachines());
-  }, [dispatch]);
+  }, [dispatch, query]);
 
   const saveMachine = async (values: MachineFormValues, machine?: Machine) => {
     const result = machine
@@ -110,67 +129,45 @@ export function MachinesPage() {
         }
       />
 
-      <TableContainer component={Paper}>
-        {status === "loading" && <LinearProgress />}
-        <Table sx={{ minWidth: 480 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell sx={hideOnMobile}>Monitoring points</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {machines.map((machine) => (
-              <TableRow key={machine.id} hover>
-                <TableCell>{machine.name}</TableCell>
-                <TableCell>
-                  <Chip
-                    size="small"
-                    label={MACHINE_TYPE_LABELS[machine.type]}
-                  />
-                </TableCell>
-                <TableCell sx={hideOnMobile}>
-                  {machine.monitoringPointsCount}
-                </TableCell>
-                <TableCell align="right">
-                  <Tooltip title="Edit">
-                    <IconButton
-                      onClick={() => openForm(machine)}
-                      aria-label={`Edit ${machine.name}`}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <IconButton
-                      color="error"
-                      onClick={() => openDelete(machine)}
-                      aria-label={`Delete ${machine.name}`}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-            {status === "succeeded" && machines.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4}>
-                  <Typography
-                    color="text.secondary"
-                    align="center"
-                    sx={{ py: 3 }}
-                  >
-                    No machines yet. Create your first one.
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <SortableTable
+        columns={columns}
+        rows={items}
+        getRowId={(m) => m.id}
+        sort={{ by: query.sortBy, order: query.order }}
+        onSortChange={({ by, order }) =>
+          dispatch(setSort({ sortBy: by, order }))
+        }
+        pagination={{
+          page: meta.page - 1,
+          rowsPerPage: meta.limit,
+          total: meta.total,
+          onPageChange: (page) => dispatch(setPage(page + 1)),
+        }}
+        loading={status === "idle" || status === "loading"}
+        emptyMessage="No machines yet. Create your first one."
+        testId="machines-table"
+        rowActions={(machine) => (
+          <>
+            <Tooltip title="Edit">
+              <IconButton
+                onClick={() => openForm(machine)}
+                aria-label={`Edit ${machine.name}`}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete">
+              <IconButton
+                color="error"
+                onClick={() => openDelete(machine)}
+                aria-label={`Delete ${machine.name}`}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
+      />
 
       <Modal {...modal.props} />
     </>

@@ -1,12 +1,25 @@
 import type {
   CreateMachineRequest,
   Machine,
+  MachineSortField,
+  PaginatedResponse,
+  SortOrder,
   UpdateMachineRequest,
 } from "@dynamoxtest/shared";
 import { http } from "../api/httpClient";
 
+export interface MachinesQuery {
+  page: number;
+  limit: number;
+  sortBy: MachineSortField;
+  order: SortOrder;
+}
+
 export const machinesApi = {
-  list: () => http.get<Machine[]>("/machines").then((r) => r.data),
+  list: (params: MachinesQuery) =>
+    http
+      .get<PaginatedResponse<Machine>>("/machines", { params })
+      .then((r) => r.data),
   create: (body: CreateMachineRequest) =>
     http.post<Machine>("/machines", body).then((r) => r.data),
   update: (id: string, body: UpdateMachineRequest) =>
