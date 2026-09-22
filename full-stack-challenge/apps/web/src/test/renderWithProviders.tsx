@@ -3,8 +3,8 @@ import { render } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider } from "@mui/material";
-import { setupStore, type RootState } from "../app/store";
-import { theme } from "../theme";
+import { setupStore, type RootState } from "../app/store/store";
+import { theme } from "../generic/theme/theme";
 
 interface Options {
   preloadedState?: Partial<RootState>;

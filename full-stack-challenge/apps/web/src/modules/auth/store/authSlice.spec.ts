@@ -1,10 +1,10 @@
 import { vi } from "vitest";
-import { setupStore } from "../../app/store";
-import { authApi } from "../../api/authApi";
-import { tokenStorage } from "../../api/tokenStorage";
+import { setupStore } from "../../../app/store/store";
+import { authApi } from "../../../services/auth/authApi";
+import { tokenStorage } from "../../../services/auth/tokenStorage";
 import { login, logout } from "./authSlice";
 
-vi.mock("../../api/authApi", () => ({
+vi.mock("../../../services/auth/authApi", () => ({
   authApi: { login: vi.fn(), me: vi.fn() },
 }));
 

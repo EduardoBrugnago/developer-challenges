@@ -3,7 +3,7 @@ import type {
   LoginRequest,
   LoginResponse,
 } from "@dynamoxtest/shared";
-import { http } from "./httpClient";
+import { http } from "../api/httpClient";
 
 export const authApi = {
   login: (body: LoginRequest) =>

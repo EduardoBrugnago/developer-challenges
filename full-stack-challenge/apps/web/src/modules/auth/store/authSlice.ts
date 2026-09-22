@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { AuthUser, LoginRequest } from "@dynamoxtest/shared";
-import { authApi } from "../../api/authApi";
-import { getErrorMessage } from "../../api/errors";
-import { tokenStorage } from "../../api/tokenStorage";
-import { createAppAsyncThunk } from "../../app/hooks";
-import type { AppDispatch, RootState } from "../../app/store";
+import { authApi } from "../../../services/auth/authApi";
+import { getErrorMessage } from "../../../services/api/errors";
+import { tokenStorage } from "../../../services/auth/tokenStorage";
+import { createAppAsyncThunk } from "../../../app/store/hooks";
+import type { AppDispatch, RootState } from "../../../app/store/store";
 
 export interface AuthState {
   token: string | null;

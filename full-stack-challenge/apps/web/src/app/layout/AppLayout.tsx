@@ -20,8 +20,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
 import SensorsIcon from "@mui/icons-material/Sensors";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { logout } from "../features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { logout } from "../../modules/auth/store/authSlice";
 
 const DRAWER_WIDTH = 240;
 

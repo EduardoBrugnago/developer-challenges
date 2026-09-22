@@ -1,7 +1,8 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AppLayout } from "../components/AppLayout";
-import { LoginPage } from "../features/auth/LoginPage";
-import { ProtectedRoute } from "../features/auth/ProtectedRoute";
+import { AppLayout } from "../layout/AppLayout";
+import { LoginPage } from "../../modules/auth/pages/LoginPage";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { MachinesPage } from "../../modules/machines/pages/MachinesPage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -12,7 +13,7 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: "/", element: <Navigate to="/machines" replace /> },
-          { path: "/machines", element: <><h1>Machines</h1></> },
+          { path: "/machines", element: <MachinesPage /> },
         ],
       },
     ],

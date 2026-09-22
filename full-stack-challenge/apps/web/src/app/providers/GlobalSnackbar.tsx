@@ -1,6 +1,6 @@
 import { Alert, Snackbar } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { dismiss } from "../features/notifications/notificationsSlice";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { dismiss } from "../store/notificationsSlice";
 
 export function GlobalSnackbar() {
   const dispatch = useAppDispatch();
