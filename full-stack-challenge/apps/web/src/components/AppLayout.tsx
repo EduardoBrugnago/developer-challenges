@@ -20,7 +20,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
 import SensorsIcon from "@mui/icons-material/Sensors";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
-import { useAppDispatch } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { logout } from "../features/auth/authSlice";
 
 const DRAWER_WIDTH = 240;
 
@@ -51,7 +52,7 @@ export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
-  const email = 'email@user.com';
+  const email = useAppSelector((state) => state.auth.user?.email);
 
   const drawerContent = (
     <>
@@ -103,7 +104,7 @@ export function AppLayout() {
           <Button
             color="inherit"
             startIcon={<LogoutIcon />}
-            onClick={() => dispatch(() => {/*logout()*/ })}
+            onClick={() => dispatch(logout())}
             data-testid="logout-button"
           >
             Logout
