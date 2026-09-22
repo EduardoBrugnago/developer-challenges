@@ -45,4 +45,9 @@ export type SortOrder = (typeof SORT_ORDERS)[number];
 
 export const MONITORING_POINTS_PAGE_SIZE = 5;
 
+export const MACHINE_SORT_FIELDS = ["name", "type", "createdAt"] as const;
+export type MachineSortField = (typeof MACHINE_SORT_FIELDS)[number];
+
+export const MACHINES_PAGE_SIZE = 10;
+
 export const MAX_POINTS_PER_REQUEST = 10_000;

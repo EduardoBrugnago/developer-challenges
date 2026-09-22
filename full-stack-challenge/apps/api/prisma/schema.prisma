@@ -36,7 +36,9 @@ model Machine {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
-  @@index([userId])
+  @@index([userId, createdAt, id])
+  @@index([userId, name, id])
+  @@index([userId, type, id])
 }
 
 model MonitoringPoint {

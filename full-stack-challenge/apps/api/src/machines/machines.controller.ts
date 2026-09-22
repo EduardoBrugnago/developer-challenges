@@ -9,20 +9,25 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from "@nestjs/common";
 import { MachinesService } from "./machines.service";
 import { JwtPayload } from "../common/types/auth.types";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { CreateMachineDto } from "./dto/create-machine.dto";
 import { UpdateMachineDto } from "./dto/update-machine.dto";
+import { ListMachinesQueryDto } from "./dto/list-machines-query.dto";
 
 @Controller("machines")
 export class MachinesController {
   constructor(private readonly machinesService: MachinesService) {}
 
   @Get()
-  findAll(@CurrentUser() user: JwtPayload) {
-    return this.machinesService.findAll(user.sub);
+  findAll(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: ListMachinesQueryDto,
+  ) {
+    return this.machinesService.findAll(user.sub, query);
   }
 
   @Get(":id")

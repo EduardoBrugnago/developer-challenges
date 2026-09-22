@@ -73,7 +73,13 @@ CREATE TABLE "DataPoint" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE INDEX "Machine_userId_idx" ON "Machine"("userId");
+CREATE INDEX "Machine_userId_createdAt_id_idx" ON "Machine"("userId", "createdAt", "id");
+
+-- CreateIndex
+CREATE INDEX "Machine_userId_name_id_idx" ON "Machine"("userId", "name", "id");
+
+-- CreateIndex
+CREATE INDEX "Machine_userId_type_id_idx" ON "Machine"("userId", "type", "id");
 
 -- CreateIndex
 CREATE INDEX "MonitoringPoint_machineId_idx" ON "MonitoringPoint"("machineId");

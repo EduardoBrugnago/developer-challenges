@@ -90,4 +90,82 @@ describe("MachinesService", () => {
     );
     expect(prisma.machine.delete).not.toHaveBeenCalled();
   });
+
+  describe("findAll", () => {
+    it.each([
+      ["name", "asc", { name: "asc" }],
+      ["type", "desc", { type: "desc" }],
+      ["createdAt", "desc", { createdAt: "desc" }],
+    ] as const)(
+      "sorts by %s %s with a tie-breaker in the same direction",
+      async (sortBy, order, expectedOrder) => {
+        prisma.$transaction.mockResolvedValue([0, []] as never);
+
+        await service.findAll(USER_ID, { page: 1, limit: 10, sortBy, order });
+
+        expect(prisma.machine.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({ orderBy: [expectedOrder, { id: order }] }),
+        );
+      },
+    );
+
+    it("paginates and computes metadata", async () => {
+      prisma.$transaction.mockResolvedValue([23, [machine("FAN")]] as never);
+
+      const result = await service.findAll(USER_ID, {
+        page: 3,
+        limit: 10,
+        sortBy: "createdAt",
+        order: "desc",
+      });
+
+      expect(prisma.machine.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 20, take: 10 }),
+      );
+      expect(result.meta).toEqual({
+        page: 3,
+        limit: 10,
+        total: 23,
+        totalPages: 3,
+      });
+      expect(result.data[0]).toMatchObject({
+        id: "m-1",
+        monitoringPointsCount: 2,
+      });
+    });
+
+    it("reports one page when the user has no machines", async () => {
+      prisma.$transaction.mockResolvedValue([0, []] as never);
+
+      const result = await service.findAll(USER_ID, {
+        page: 1,
+        limit: 10,
+        sortBy: "createdAt",
+        order: "desc",
+      });
+
+      expect(result).toEqual({
+        data: [],
+        meta: { page: 1, limit: 10, total: 0, totalPages: 1 },
+      });
+    });
+
+    it("only lists machines of the authenticated user", async () => {
+      prisma.$transaction.mockResolvedValue([0, []] as never);
+
+      await service.findAll(USER_ID, {
+        page: 1,
+        limit: 10,
+        sortBy: "createdAt",
+        order: "desc",
+      });
+
+      expect(prisma.machine.count).toHaveBeenCalledWith({
+        where: { userId: USER_ID },
+      });
+      expect(prisma.machine.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { userId: USER_ID } }),
+      );
+    });
+  });
 });

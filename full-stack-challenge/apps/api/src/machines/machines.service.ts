@@ -1,9 +1,12 @@
-import { Machine, MachineType } from "@prisma/client";
+import { Machine, MachineType, Prisma } from "@prisma/client";
 import {
   isSensorModelAllowed,
   MACHINE_TYPE_LABELS,
   SENSOR_MODEL_LABELS,
   type Machine as MachineResponse,
+  type MachineSortField,
+  type PaginatedResponse,
+  type SortOrder,
 } from "@dynamoxtest/shared";
 import {
   Injectable,
@@ -13,6 +16,16 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateMachineDto } from "./dto/create-machine.dto";
 import { UpdateMachineDto } from "./dto/update-machine.dto";
+import { ListMachinesQueryDto } from "./dto/list-machines-query.dto";
+
+const ORDER_BY: Record<
+  MachineSortField,
+  (order: SortOrder) => Prisma.MachineOrderByWithRelationInput
+> = {
+  name: (order) => ({ name: order }),
+  type: (order) => ({ type: order }),
+  createdAt: (order) => ({ createdAt: order }),
+};
 
 type MachineWithCount = Machine & { _count: { monitoringPoints: number } };
 
@@ -33,14 +46,33 @@ const withCount = { _count: { select: { monitoringPoints: true } } } as const;
 export class MachinesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(userId: string): Promise<MachineResponse[]> {
-    const machines = await this.prisma.machine.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      include: withCount,
-    });
+  async findAll(
+    userId: string,
+    query: ListMachinesQueryDto,
+  ): Promise<PaginatedResponse<MachineResponse>> {
+    const { page, limit, sortBy, order } = query;
+    const where: Prisma.MachineWhereInput = { userId };
 
-    return machines.map(toResponse);
+    const [total, machines] = await this.prisma.$transaction([
+      this.prisma.machine.count({ where }),
+      this.prisma.machine.findMany({
+        where,
+        include: withCount,
+        orderBy: [ORDER_BY[sortBy](order), { id: order }],
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      data: machines.map(toResponse),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
+    };
   }
 
   async findOne(userId: string, id: string): Promise<MachineResponse> {
