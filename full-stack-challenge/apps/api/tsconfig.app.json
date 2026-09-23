@@ -3,17 +3,13 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "target": "es2021",
     "moduleResolution": "bundler"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "jest.config.ts",
     "jest.config.cts",
@@ -23,7 +19,7 @@
   ],
   "references": [
     {
-      "path": "../../libs/shared"
+      "path": "../../libs/shared/tsconfig.lib.json"
     }
   ]
 }

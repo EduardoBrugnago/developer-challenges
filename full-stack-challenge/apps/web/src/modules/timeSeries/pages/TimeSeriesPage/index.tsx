@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { isFulfilled } from "@reduxjs/toolkit";
 import {
+  Box,
   Button,
   Card,
   CardContent,
@@ -21,6 +22,7 @@ import { useAppDispatch, useAppSelector } from "../../../../app/store/hooks";
 import { notify } from "../../../../app/store/notificationsSlice";
 import { Modal } from "../../../../generic/components/Modal";
 import { PageHeader } from "../../../../generic/components/PageHeader";
+import { SelectField } from "../../../../generic/components/SelectField";
 import {
   SortableTable,
   type Column,
@@ -35,6 +37,7 @@ import {
   deleteTimeSeries,
   fetchSensorOptions,
   fetchTimeSeriesOverview,
+  setSensorFilter,
 } from "../../store/timeSeriesSlice";
 
 const columns: Column<TimeSeriesSummary, never>[] = [
@@ -67,13 +70,16 @@ const columns: Column<TimeSeriesSummary, never>[] = [
 export function TimeSeriesPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { list, count, listStatus, sensors } = useAppSelector(
+  const { list, count, listStatus, sensors, sensorFilter } = useAppSelector(
     (state) => state.timeSeries,
   );
   const modal = useModal();
 
   useEffect(() => {
     dispatch(fetchTimeSeriesOverview());
+  }, [dispatch, sensorFilter]);
+
+  useEffect(() => {
     dispatch(fetchSensorOptions());
   }, [dispatch]);
 
@@ -106,7 +112,6 @@ export function TimeSeriesPage() {
       maxWidth: "sm",
       content: (
         <TimeSeriesForm
-          sensors={sensors}
           onSubmit={(sensorId, body) =>
             modal.run(() => storeSeries(sensorId, body))
           }
@@ -155,6 +160,21 @@ export function TimeSeriesPage() {
           </Typography>
         </CardContent>
       </Card>
+
+      <Box sx={{ mb: 2, maxWidth: { sm: 420 } }}>
+        <SelectField
+          label="Filter by sensor"
+          value={sensorFilter ?? ""}
+          options={sensors.map((sensor) => ({
+            value: sensor.id,
+            label: `${sensor.uniqueId} · ${SENSOR_MODEL_LABELS[sensor.model]} · ${sensor.machineName} / ${sensor.monitoringPointName}`,
+          }))}
+          onChange={(sensorId) =>
+            dispatch(setSensorFilter(sensorId || undefined))
+          }
+          testId="series-sensor-filter"
+        />
+      </Box>
 
       <SortableTable
         testId="time-series-table"

@@ -1,35 +1,31 @@
 /// <reference types="cypress" />
 
-// ***********************************************
-// This example commands.ts shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-declare namespace Cypress {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface Chainable<Subject> {
-    login(email: string, password: string): void;
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable {
+      /** Types in the searchable select and picks the option by its text. */
+      selectOption(testId: string, optionText: string): Chainable<void>;
+      loginViaUi(): Chainable<void>;
+    }
   }
 }
 
-// -- This is a parent command --
-Cypress.Commands.add('login', (email, password) => {
-  console.log('Custom command example: Login', email, password);
+Cypress.Commands.add("selectOption", (testId: string, optionText: string) => {
+  cy.get(`[data-testid="${testId}"] input[role="combobox"]`)
+    .clear()
+    .type(optionText);
+  cy.get('[role="listbox"]').contains("li", optionText).click();
 });
-//
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add("loginViaUi", () => {
+  cy.visit("/login");
+  cy.get('[data-testid="login-email"]').type(Cypress.env("USER_EMAIL"));
+  cy.get('[data-testid="login-password"]').type(Cypress.env("USER_PASSWORD"), {
+    log: false,
+  });
+  cy.get('[data-testid="login-submit"]').click();
+  cy.location("pathname").should("eq", "/machines");
+});
+
+export {};

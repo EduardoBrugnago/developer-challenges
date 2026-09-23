@@ -81,7 +81,8 @@ export class TimeSeriesController {
   metrics(
     @CurrentUser() user: JwtPayload,
     @Param("id", ParseUUIDPipe) id: string,
+    @Query() range: TimeRangeQueryDto,
   ) {
-    return this.service.metrics(user.sub, id);
+    return this.service.metrics(user.sub, id, range);
   }
 }

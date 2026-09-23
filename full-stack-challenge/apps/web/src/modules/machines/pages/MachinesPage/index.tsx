@@ -116,7 +116,7 @@ export function MachinesPage() {
     <>
       <PageHeader
         title="Machines"
-        subtitle="Register the assets you want to monitor"
+        subtitle="Register machines you want to monitor"
         actions={
           <Button
             variant="contained"

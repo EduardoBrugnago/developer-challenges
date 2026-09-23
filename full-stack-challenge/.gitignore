@@ -31,3 +31,5 @@ apps/web-e2e/cypress/screenshots
 # vite / vitest
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
+# cypress
+apps/web-e2e/cypress/downloads

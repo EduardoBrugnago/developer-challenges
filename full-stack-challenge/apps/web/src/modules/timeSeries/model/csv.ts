@@ -5,6 +5,11 @@ export interface CsvParseResult {
   errors: string[];
 }
 
+export function toTimeSeriesCsv(points: DataPointInput[]): string {
+  const rows = points.map((p) => `${p.timestamp},${p.value}`);
+  return ["timestamp,value", ...rows].join("\n");
+}
+
 /**
  * Reads "timestamp,value" lines. Header is optional
  * timestamp anything Date.parse accepts

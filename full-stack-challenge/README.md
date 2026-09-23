@@ -1,5 +1,18 @@
 # Dynamox Full-Stack Challenge
 
+## Live app
+
+| | |
+|---|---|
+| **App** | https://developer-challenges.vercel.app |
+| **API** | https://developer-challenges-y7xt.onrender.com/api/health |
+| **Email** | `admin@dynamox.com` |
+| **Password** | `dynamox123` |
+
+The frontend is on Vercel and API runs as Docker service on Render, against a Neon PostgreSQL database.
+
+**The API sleeps after 15 minutes of inactivity**, so the first request wakes the container and can take up to a minute; the login may time out once. That delay is cold start.
+
 Nx monorepo with three projects:
 
 | Project | Stack |
