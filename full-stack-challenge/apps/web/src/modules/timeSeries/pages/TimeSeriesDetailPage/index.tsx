@@ -134,7 +134,7 @@ export function TimeSeriesDetailPage() {
         title={series.name}
         subtitle={
           metrics.startAt && metrics.endAt
-            ? `${new Date(metrics.startAt).toLocaleString()} → ${new Date(metrics.endAt).toLocaleString()}`
+            ? `${new Date(metrics.startAt).toLocaleString()} - ${new Date(metrics.endAt).toLocaleString()}`
             : undefined
         }
         actions={

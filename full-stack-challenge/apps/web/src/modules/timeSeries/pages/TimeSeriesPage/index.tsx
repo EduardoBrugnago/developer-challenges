@@ -7,8 +7,6 @@ import {
   Card,
   CardContent,
   IconButton,
-  MenuItem,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -24,6 +22,7 @@ import { useAppDispatch, useAppSelector } from "../../../../app/store/hooks";
 import { notify } from "../../../../app/store/notificationsSlice";
 import { Modal } from "../../../../generic/components/Modal";
 import { PageHeader } from "../../../../generic/components/PageHeader";
+import { SelectField } from "../../../../generic/components/SelectField";
 import {
   SortableTable,
   type Column,
@@ -164,24 +163,18 @@ export function TimeSeriesPage() {
       </Card>
 
       <Box sx={{ mb: 2, maxWidth: { sm: 420 } }}>
-        <TextField
-          select
-          fullWidth
+        <SelectField
           label="Filter by sensor"
           value={sensorFilter ?? ""}
-          onChange={(e) =>
-            dispatch(setSensorFilter(e.target.value || undefined))
+          options={sensors.map((sensor) => ({
+            value: sensor.id,
+            label: `${sensor.uniqueId} · ${SENSOR_MODEL_LABELS[sensor.model]} · ${sensor.machineName} / ${sensor.monitoringPointName}`,
+          }))}
+          onChange={(sensorId) =>
+            dispatch(setSensorFilter(sensorId || undefined))
           }
-          data-testid="series-sensor-filter"
-        >
-          <MenuItem value="">All sensors</MenuItem>
-          {sensors.map((sensor) => (
-            <MenuItem key={sensor.id} value={sensor.id}>
-              {sensor.uniqueId} · {SENSOR_MODEL_LABELS[sensor.model]} ·{" "}
-              {sensor.machineName} / {sensor.monitoringPointName}
-            </MenuItem>
-          ))}
-        </TextField>
+          testId="series-sensor-filter"
+        />
       </Box>
 
       <SortableTable

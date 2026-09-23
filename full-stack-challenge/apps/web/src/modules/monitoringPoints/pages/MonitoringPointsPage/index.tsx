@@ -1,14 +1,6 @@
 import { useEffect } from "react";
 import { isFulfilled } from "@reduxjs/toolkit";
-import {
-  Box,
-  Chip,
-  IconButton,
-  MenuItem,
-  TextField,
-  Tooltip,
-  Button,
-} from "@mui/material";
+import { Box, Button, Chip, IconButton, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SensorsIcon from "@mui/icons-material/Sensors";
@@ -22,6 +14,7 @@ import { useAppDispatch, useAppSelector } from "../../../../app/store/hooks";
 import { notify } from "../../../../app/store/notificationsSlice";
 import { Modal } from "../../../../generic/components/Modal";
 import { PageHeader } from "../../../../generic/components/PageHeader";
+import { SelectField } from "../../../../generic/components/SelectField";
 import {
   SortableTable,
   type Column,
@@ -64,7 +57,7 @@ const columns: Column<MonitoringPointListItem, MonitoringPointSortField>[] = [
     sortKey: "machineType",
     render: (row) => MACHINE_TYPE_LABELS[row.machine.type],
   },
-  
+
   {
     id: "sensorModel",
     label: "Sensor Model",
@@ -176,7 +169,7 @@ export function MonitoringPointsPage() {
     <>
       <PageHeader
         title="Monitoring points"
-        subtitle="Where sensors are installed on your machines"
+        subtitle="Register sensors on your machines"
         actions={
           <Button
             variant="contained"
@@ -190,23 +183,18 @@ export function MonitoringPointsPage() {
       />
 
       <Box sx={{ mb: 2, maxWidth: { sm: 320 } }}>
-        <TextField
-          select
-          fullWidth
+        <SelectField
           label="Filter by machine"
           value={query.machineId ?? ""}
-          onChange={(e) =>
-            dispatch(setMachineFilter(e.target.value || undefined))
+          options={machines.map((machine) => ({
+            value: machine.id,
+            label: machine.name,
+          }))}
+          onChange={(machineId) =>
+            dispatch(setMachineFilter(machineId || undefined))
           }
-          data-testid="point-machine-filter"
-        >
-          <MenuItem value="">All machines</MenuItem>
-          {machines.map((machine) => (
-            <MenuItem key={machine.id} value={machine.id}>
-              {machine.name}
-            </MenuItem>
-          ))}
-        </TextField>
+          testId="point-machine-filter"
+        />
       </Box>
 
       <SortableTable
