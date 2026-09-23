@@ -99,7 +99,8 @@ export function TimeSeriesDetailPage() {
 
   const exportCsv = () => {
     if (!series) return;
-    const suffix = from || to ? `-${from || "start"}_${to || "end"}` : "";
+    const period = `${from || "start"}_${to || "end"}`.replace(/:/g, "-");
+    const suffix = from || to ? `-${period}` : "";
     const url = URL.createObjectURL(
       new Blob([toTimeSeriesCsv(series.points)], { type: "text/csv" }),
     );

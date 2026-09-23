@@ -15,8 +15,8 @@ import {
   MAX_POINTS_PER_REQUEST,
   SENSOR_MODEL_LABELS,
   type CreateTimeSeriesRequest,
-  type SensorOption,
 } from "@dynamoxtest/shared";
+import { useAppSelector } from "../../../../app/store/hooks";
 import { SelectField } from "../../../../generic/components/SelectField";
 import { parseTimeSeriesCsv } from "../../model/csv";
 import { generateSampleSeries } from "../../model/sampleData";
@@ -29,11 +29,11 @@ import {
 export const SERIES_FORM_ID = "time-series-form";
 
 interface TimeSeriesFormProps {
-  sensors: SensorOption[];
   onSubmit: (sensorId: string, body: CreateTimeSeriesRequest) => void;
 }
 
-export function TimeSeriesForm({ sensors, onSubmit }: TimeSeriesFormProps) {
+export function TimeSeriesForm({ onSubmit }: TimeSeriesFormProps) {
+  const sensors = useAppSelector((state) => state.timeSeries.sensors);
   const {
     register,
     control,

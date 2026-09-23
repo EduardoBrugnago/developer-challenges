@@ -112,7 +112,6 @@ export function TimeSeriesPage() {
       maxWidth: "sm",
       content: (
         <TimeSeriesForm
-          sensors={sensors}
           onSubmit={(sensorId, body) =>
             modal.run(() => storeSeries(sensorId, body))
           }

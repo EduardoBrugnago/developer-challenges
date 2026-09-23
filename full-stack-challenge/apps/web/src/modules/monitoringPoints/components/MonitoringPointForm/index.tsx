@@ -1,24 +1,19 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Stack, TextField } from "@mui/material";
-import {
-  MACHINE_TYPE_LABELS,
-  type MachineOption,
-} from "@dynamoxtest/shared";
+import { MACHINE_TYPE_LABELS } from "@dynamoxtest/shared";
+import { useAppSelector } from "../../../../app/store/hooks";
 import { SelectField } from "../../../../generic/components/SelectField";
 import { pointSchema, type PointFormValues } from "../../model/pointSchema";
 
 export const POINT_FORM_ID = "monitoring-point-form";
 
 interface MonitoringPointFormProps {
-  machines: MachineOption[];
   onSubmit: (values: PointFormValues) => void;
 }
 
-export function MonitoringPointForm({
-  machines,
-  onSubmit,
-}: MonitoringPointFormProps) {
+export function MonitoringPointForm({ onSubmit }: MonitoringPointFormProps) {
+  const machines = useAppSelector((state) => state.machines.options);
   const {
     register,
     control,

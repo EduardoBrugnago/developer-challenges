@@ -130,7 +130,6 @@ export function MonitoringPointsPage() {
       icon: <AddIcon />,
       content: (
         <MonitoringPointForm
-          machines={machines}
           onSubmit={(values) => modal.run(() => createPoint(values))}
         />
       ),
