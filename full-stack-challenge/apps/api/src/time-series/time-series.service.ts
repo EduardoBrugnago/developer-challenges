@@ -179,8 +179,20 @@ export class TimeSeriesService {
     return series;
   }
 
-  async metrics(userId: string, id: string): Promise<TimeSeriesMetrics> {
+  async metrics(
+    userId: string,
+    id: string,
+    range: TimeRangeQueryDto = {},
+  ): Promise<TimeSeriesMetrics> {
     await this.findOwnedOrThrow(userId, id);
+
+    const filters = [Prisma.sql`"seriesId" = ${id}`];
+    if (range.from) {
+      filters.push(Prisma.sql`"timestamp" >= ${new Date(range.from)}`);
+    }
+    if (range.to) {
+      filters.push(Prisma.sql`"timestamp" <= ${new Date(range.to)}`);
+    }
 
     const [row] = await this.prisma.$queryRaw<MetricsRow[]>`
       SELECT
@@ -193,7 +205,7 @@ export class TimeSeriesService {
         MIN("timestamp")                                     AS "startAt",
         MAX("timestamp")                                     AS "endAt"
       FROM "DataPoint"
-      WHERE "seriesId" = ${id}
+      WHERE ${Prisma.join(filters, " AND ")}
     `;
 
     return {
