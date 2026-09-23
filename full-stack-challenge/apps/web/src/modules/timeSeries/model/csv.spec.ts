@@ -1,4 +1,23 @@
-import { parseTimeSeriesCsv } from "./csv";
+import { parseTimeSeriesCsv, toTimeSeriesCsv } from "./csv";
+
+describe("toTimeSeriesCsv", () => {
+  it("writes a header and one row per point, and parses back to the same points", () => {
+    const points = [
+      { timestamp: "2026-01-01T00:00:00.000Z", value: 1.5 },
+      { timestamp: "2026-01-01T00:01:00.000Z", value: 2 },
+    ];
+
+    const csv = toTimeSeriesCsv(points);
+
+    expect(csv.split("\n")[0]).toBe("timestamp,value");
+    expect(csv.split("\n")).toHaveLength(3);
+    expect(parseTimeSeriesCsv(csv).points).toEqual(points);
+  });
+
+  it("writes only the header when there are no points", () => {
+    expect(toTimeSeriesCsv([])).toBe("timestamp,value");
+  });
+});
 
 describe("parseTimeSeriesCsv", () => {
   it("parses rows and skips the header", () => {

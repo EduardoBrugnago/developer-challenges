@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type {
   CreateTimeSeriesRequest,
   SensorOption,
@@ -8,7 +8,10 @@ import type {
 } from "@dynamoxtest/shared";
 import { getErrorMessage } from "../../../services/api/errors";
 import { monitoringPointsApi } from "../../../services/monitoringPoints/monitoringPointsApi";
-import { timeSeriesApi } from "../../../services/timeSeries/timeSeriesApi";
+import {
+  timeSeriesApi,
+  type TimeRange,
+} from "../../../services/timeSeries/timeSeriesApi";
 import { createAppAsyncThunk } from "../../../app/store/hooks";
 
 type Status = "idle" | "loading" | "succeeded" | "failed";
@@ -18,6 +21,7 @@ export interface TimeSeriesState {
   count: number | null;
   listStatus: Status;
   sensors: SensorOption[];
+  sensorFilter?: string;
   detail: {
     series: TimeSeriesDetail | null;
     metrics: TimeSeriesMetrics | null;
@@ -35,10 +39,10 @@ const initialState: TimeSeriesState = {
 
 export const fetchTimeSeriesOverview = createAppAsyncThunk(
   "timeSeries/fetchOverview",
-  async (_: void, { rejectWithValue }) => {
+  async (_: void, { getState, rejectWithValue }) => {
     try {
       const [list, count] = await Promise.all([
-        timeSeriesApi.list(),
+        timeSeriesApi.list(getState().timeSeries.sensorFilter),
         timeSeriesApi.count(),
       ]);
       return { list, count };
@@ -86,11 +90,14 @@ export const deleteTimeSeries = createAppAsyncThunk(
 
 export const fetchTimeSeriesDetail = createAppAsyncThunk(
   "timeSeries/fetchDetail",
-  async (id: string, { rejectWithValue }) => {
+  async (
+    { id, range = {} }: { id: string; range?: TimeRange },
+    { rejectWithValue },
+  ) => {
     try {
       const [series, metrics] = await Promise.all([
-        timeSeriesApi.get(id),
-        timeSeriesApi.metrics(id),
+        timeSeriesApi.get(id, range),
+        timeSeriesApi.metrics(id, range),
       ]);
       return { series, metrics };
     } catch (error) {
@@ -102,7 +109,11 @@ export const fetchTimeSeriesDetail = createAppAsyncThunk(
 const timeSeriesSlice = createSlice({
   name: "timeSeries",
   initialState,
-  reducers: {},
+  reducers: {
+    setSensorFilter(state, action: PayloadAction<string | undefined>) {
+      state.sensorFilter = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTimeSeriesOverview.pending, (state) => {
@@ -131,7 +142,7 @@ const timeSeriesSlice = createSlice({
         }
       })
       .addCase(fetchTimeSeriesDetail.pending, (state) => {
-        state.detail = { ...initialState.detail, status: "loading" };
+        state.detail.status = "loading";
       })
       .addCase(fetchTimeSeriesDetail.fulfilled, (state, action) => {
         state.detail.status = "succeeded";
@@ -144,4 +155,5 @@ const timeSeriesSlice = createSlice({
   },
 });
 
+export const { setSensorFilter } = timeSeriesSlice.actions;
 export default timeSeriesSlice.reducer;

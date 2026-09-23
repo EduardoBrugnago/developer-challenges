@@ -1,17 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { isFulfilled } from "@reduxjs/toolkit";
 import {
   Alert,
   Button,
   Grid,
+  LinearProgress,
   Paper,
   Skeleton,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
+import DownloadIcon from "@mui/icons-material/Download";
 import { useAppDispatch, useAppSelector } from "../../../../app/store/hooks";
 import { notify } from "../../../../app/store/notificationsSlice";
 import { Modal } from "../../../../generic/components/Modal";
@@ -19,6 +22,7 @@ import { PageHeader } from "../../../../generic/components/PageHeader";
 import { useModal } from "../../../../generic/hooks/useModal";
 import { MetricsCards } from "../../components/MetricsCards";
 import { TimeSeriesChart } from "../../components/TimeSeriesChart";
+import { toTimeSeriesCsv } from "../../model/csv";
 import {
   deleteTimeSeries,
   fetchTimeSeriesDetail,
@@ -32,10 +36,20 @@ export function TimeSeriesDetailPage() {
     (state) => state.timeSeries.detail,
   );
   const modal = useModal();
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
 
   useEffect(() => {
-    dispatch(fetchTimeSeriesDetail(id));
-  }, [dispatch, id]);
+    dispatch(
+      fetchTimeSeriesDetail({
+        id,
+        range: {
+          from: from ? new Date(from).toISOString() : undefined,
+          to: to ? new Date(to).toISOString() : undefined,
+        },
+      }),
+    );
+  }, [dispatch, id, from, to]);
 
   const removeSeries = async () => {
     const result = await dispatch(deleteTimeSeries(id));
@@ -45,7 +59,9 @@ export function TimeSeriesDetailPage() {
     return true;
   };
 
-  if (status === "loading" || status === "idle") {
+  const loading = status === "loading" || status === "idle";
+
+  if (loading && (!series || !metrics)) {
     return (
       <div data-testid="series-detail-skeleton">
         <Skeleton variant="text" width={140} height={36} sx={{ mb: 1 }} />
@@ -81,6 +97,19 @@ export function TimeSeriesDetailPage() {
     );
   }
 
+  const exportCsv = () => {
+    if (!series) return;
+    const suffix = from || to ? `-${from || "start"}_${to || "end"}` : "";
+    const url = URL.createObjectURL(
+      new Blob([toTimeSeriesCsv(series.points)], { type: "text/csv" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${series.name}${suffix}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const openDelete = () =>
     modal.open({
       title: "Delete time series?",
@@ -109,17 +138,64 @@ export function TimeSeriesDetailPage() {
             : undefined
         }
         actions={
-          <Button
-            color="error"
-            variant="outlined"
-            startIcon={<DeleteIcon />}
-            onClick={openDelete}
-            data-testid="delete-series-button"
-          >
-            Delete
-          </Button>
+          <>
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={exportCsv}
+              disabled={series.points.length === 0}
+              data-testid="export-series-button"
+            >
+              Export CSV
+            </Button>
+            <Button
+              color="error"
+              variant="outlined"
+              startIcon={<DeleteIcon />}
+              onClick={openDelete}
+              data-testid="delete-series-button"
+            >
+              Delete
+            </Button>
+          </>
         }
       />
+
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ mb: 2 }}
+      >
+        <TextField
+          type="datetime-local"
+          label="From"
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          inputProps={{ "data-testid": "series-from-input" }}
+        />
+        <TextField
+          type="datetime-local"
+          label="To"
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          inputProps={{ "data-testid": "series-to-input" }}
+        />
+        {(from || to) && (
+          <Button
+            onClick={() => {
+              setFrom("");
+              setTo("");
+            }}
+            data-testid="series-clear-range"
+          >
+            Clear period
+          </Button>
+        )}
+      </Stack>
+
+      {loading && <LinearProgress sx={{ mb: 1 }} />}
 
       <Stack>
         <MetricsCards metrics={metrics} unit={series.unit} />
@@ -130,7 +206,7 @@ export function TimeSeriesDetailPage() {
             fontWeight={600}
             sx={{ mb: 1, px: 1 }}
           >
-            Signal
+            Signal · {series.points.length.toLocaleString()} points
           </Typography>
           <TimeSeriesChart points={series.points} unit={series.unit} />
         </Paper>

@@ -2,10 +2,13 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { isFulfilled } from "@reduxjs/toolkit";
 import {
+  Box,
   Button,
   Card,
   CardContent,
   IconButton,
+  MenuItem,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -35,6 +38,7 @@ import {
   deleteTimeSeries,
   fetchSensorOptions,
   fetchTimeSeriesOverview,
+  setSensorFilter,
 } from "../../store/timeSeriesSlice";
 
 const columns: Column<TimeSeriesSummary, never>[] = [
@@ -67,13 +71,16 @@ const columns: Column<TimeSeriesSummary, never>[] = [
 export function TimeSeriesPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { list, count, listStatus, sensors } = useAppSelector(
+  const { list, count, listStatus, sensors, sensorFilter } = useAppSelector(
     (state) => state.timeSeries,
   );
   const modal = useModal();
 
   useEffect(() => {
     dispatch(fetchTimeSeriesOverview());
+  }, [dispatch, sensorFilter]);
+
+  useEffect(() => {
     dispatch(fetchSensorOptions());
   }, [dispatch]);
 
@@ -155,6 +162,27 @@ export function TimeSeriesPage() {
           </Typography>
         </CardContent>
       </Card>
+
+      <Box sx={{ mb: 2, maxWidth: { sm: 420 } }}>
+        <TextField
+          select
+          fullWidth
+          label="Filter by sensor"
+          value={sensorFilter ?? ""}
+          onChange={(e) =>
+            dispatch(setSensorFilter(e.target.value || undefined))
+          }
+          data-testid="series-sensor-filter"
+        >
+          <MenuItem value="">All sensors</MenuItem>
+          {sensors.map((sensor) => (
+            <MenuItem key={sensor.id} value={sensor.id}>
+              {sensor.uniqueId} · {SENSOR_MODEL_LABELS[sensor.model]} ·{" "}
+              {sensor.machineName} / {sensor.monitoringPointName}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Box>
 
       <SortableTable
         testId="time-series-table"
