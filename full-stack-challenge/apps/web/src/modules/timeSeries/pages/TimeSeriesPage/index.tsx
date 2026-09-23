@@ -156,7 +156,7 @@ export function TimeSeriesPage() {
             Stored time series
           </Typography>
           <Typography variant="h4" fontWeight={700} data-testid="series-count">
-            {count ?? "—"}
+            {count ?? "-"}
           </Typography>
         </CardContent>
       </Card>
