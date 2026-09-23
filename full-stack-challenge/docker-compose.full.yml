@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dynamox
+      POSTGRES_PASSWORD: dynamox
+      POSTGRES_DB: dynamoxtest
+    volumes:
+      - pgdata-full:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dynamox -d dynamoxtest"]
+      interval: 5s
+      retries: 10
+
+  api1: &api
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://dynamox:dynamox@db:5432/dynamoxtest?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api2:
+    <<: *api
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - api1
+      - api2
+
+volumes:
+  pgdata-full:
