@@ -7,7 +7,7 @@ interface MetricsCardsProps {
 }
 
 const format = (value: number | null, digits = 3) =>
-  value === null ? "—" : value.toFixed(digits);
+  value === null ? "-" : value.toFixed(digits);
 
 export function MetricsCards({ metrics, unit }: MetricsCardsProps) {
   const suffix = unit ? ` ${unit}` : "";
