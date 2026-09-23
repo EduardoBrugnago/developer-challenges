@@ -20,5 +20,10 @@
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
     "src/test-utils/**"
+  ],
+  "references": [
+    {
+      "path": "../../libs/shared"
+    }
   ]
 }
