@@ -1,21 +1,17 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "../../dist/out-tsc/api-spec",
     "module": "commonjs",
     "moduleResolution": "bundler",
-    "types": [
-      "jest",
-      "node"
-    ],
-    "allowJs": true
+    "types": ["jest", "node"],
+    "allowJs": true,
+    "declaration": true
   },
   "include": [
     "jest.config.ts",
     "jest.config.cts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts",
-    "src/test-utils/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.d.ts"
   ]
 }
