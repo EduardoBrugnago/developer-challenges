@@ -12,9 +12,9 @@ declare global {
 }
 
 Cypress.Commands.add("selectOption", (testId: string, optionText: string) => {
-  cy.get(`[data-testid="${testId}"] input[role="combobox"]`)
-    .clear()
-    .type(optionText);
+  const input = `[data-testid="${testId}"] input[role="combobox"]`;
+  cy.get(input).clear();
+  cy.get(input).type(optionText);
   cy.get('[role="listbox"]').contains("li", optionText).click();
 });
 
